@@ -122,7 +122,6 @@ export async function downloadFromCache(
     try {
       const response = await s3.getObject(getObjectRequest).promise();
       core.info("Successfully made request!");
-      core.info(String(response.Body));
       writeFileSync(path, response.Body?.toString());
       core.info("Wrote to file!");
       const cargoBinPath = binPath();
