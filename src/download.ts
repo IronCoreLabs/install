@@ -119,8 +119,10 @@ export async function downloadFromCache(
       Key: `${crate}/${runner}/${crate}-${version}.zip`,
     };
     const response = await s3.getObject(getObjectRequest).promise();
-    console.log("Success");
+    core.info("Successfully downloaded");
+    core.info(String(response.Body));
     writeFileSync(path, response.Body?.toString());
+    core.info("Wrote to file!");
 
     // try {
     // core.info("Starting signature verification process");
