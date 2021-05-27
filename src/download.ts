@@ -118,13 +118,9 @@ export async function downloadFromCache(
       Bucket: "rust-tool-cache",
       Key: `${crate}/${runner}/${crate}-${version}.zip`,
     };
-    s3.getObject(getObjectRequest, function (err, data) {
-      if (err) throw err;
-      else {
-        console.log("Success", data);
-        writeFileSync(path, data.Body?.toString());
-      }
-    });
+    const response = await s3.getObject(getObjectRequest).promise();
+    console.log("Success");
+    writeFileSync(path, response.Body?.toString());
 
     // try {
     // core.info("Starting signature verification process");
