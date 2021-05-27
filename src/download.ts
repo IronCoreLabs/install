@@ -1,5 +1,5 @@
 import os from "os";
-import { promises as fs, writeFileSync } from "fs";
+import { promises as fs } from "fs";
 import path from "path";
 
 import * as core from "@actions/core";
@@ -117,22 +117,16 @@ export async function downloadFromCache(
     const getObjectRequest = {
       Bucket: "rust-tool-cache",
       Key: `${crate}/${runner}/${crate}-${version}.zip`,
+      Expires: 60,
     };
-    core.info("Going to make request");
-    try {
-      const response = await s3.getObject(getObjectRequest).promise();
-      core.info("Successfully made request!");
-      writeFileSync(path, response.Body?.toString());
-      core.info("Wrote to file!");
-      const cargoBinPath = binPath();
-      core.info(`Extracting files into ${cargoBinPath}`);
-      await tc.extractZip(path, cargoBinPath);
-      await fs.chmod(path, 0o755);
-    } catch (err) {
-      core.error("ERROR");
-      core.error(err);
-      throw err;
-    }
+    const url = s3.getSignedUrl("getObject", getObjectRequest);
+    core.info(url);
+    await tc.downloadTool(url, path);
+    core.info("Successfully downloaded file!");
+    const cargoBinPath = binPath();
+    core.info(`Extracting files into ${cargoBinPath}`);
+    await tc.extractZip(path, cargoBinPath);
+    await fs.chmod(path, 0o755);
 
     // try {
     // core.info("Starting signature verification process");
