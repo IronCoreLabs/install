@@ -8,16 +8,16 @@ inputs:
   crate:
     description: Binary crate name
     required: true
-  version:
-    description: Specify a version to install
-    required: false
-    default: "latest"
-  access-key:
+    access-key:
     description: AWS access key
     required: true
   secret-key:
     description: AWS secret key
     required: true
+  version:
+    description: Specify a version to install
+    required: false
+    default: "latest"
 runs:
   using: "node12"
   main: "dist/index.js"

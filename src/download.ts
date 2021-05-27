@@ -117,12 +117,10 @@ export async function downloadFromCache(
     const getObjectRequest = {
       Bucket: "rust-tool-cache",
       Key: `${crate}/${runner}/${crate}-${version}.zip`,
-      Expires: 60,
+      Expires: 30,
     };
     const url = s3.getSignedUrl("getObject", getObjectRequest);
-    core.info(url);
     await tc.downloadTool(url, path);
-    core.info("Successfully downloaded file!");
     const cargoBinPath = binPath();
     core.info(`Extracting files into ${cargoBinPath}`);
     await tc.extractZip(path, cargoBinPath);
