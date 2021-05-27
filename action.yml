@@ -8,10 +8,10 @@ inputs:
   crate:
     description: Binary crate name
     required: true
-    access-key:
+  accesskey:
     description: AWS access key
     required: true
-  secret-key:
+  secretkey:
     description: AWS secret key
     required: true
   version:

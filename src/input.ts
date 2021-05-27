@@ -16,8 +16,8 @@ export interface Input {
 export function get(): Input {
   const crate = input.getInput("crate", { required: true });
   const version = input.getInput("version", { required: true });
-  const accessKey = input.getInput("access-key", { required: true });
-  const secretKey = input.getInput("secret-key", { required: true });
+  const accessKey = input.getInput("accesskey", { required: true });
+  const secretKey = input.getInput("secretkey", { required: true });
 
   return {
     crate: crate,
