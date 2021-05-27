@@ -1,5 +1,5 @@
 import * as core from "@actions/core";
-import { Cargo } from "@actions-rs/core";
+// import { Cargo } from "@actions-rs/core";
 
 import * as input from "./input";
 import * as download from "./download";
@@ -30,26 +30,26 @@ export async function run(
   version: string,
   options: Options
 ): Promise<void> {
-  try {
-    if (options.useToolCache) {
-      try {
-        core.info("Tool cache is explicitly enabled via the Action input");
-        core.startGroup("Downloading from the tool cache");
+  //   try {
+  if (options.useToolCache) {
+    try {
+      core.info("Tool cache is explicitly enabled via the Action input");
+      core.startGroup("Downloading from the tool cache");
 
-        return await downloadFromToolCache(crate, version, options);
-      } finally {
-        core.endGroup();
-      }
-    } else {
-      core.info("Tool cache is disabled in the Action inputs, skipping it");
-
-      throw new Error("Faster installation options either failed or disabled");
+      return await downloadFromToolCache(crate, version, options);
+    } finally {
+      core.endGroup();
     }
-  } catch (error) {
-    core.info("Falling back to the `cargo install` command");
-    const cargo = await Cargo.get();
-    await cargo.installCached(crate, version);
+  } else {
+    core.info("Tool cache is disabled in the Action inputs, skipping it");
+
+    throw new Error("Faster installation options either failed or disabled");
   }
+  //   } catch (error) {
+  //     core.info("Falling back to the `cargo install` command");
+  //     const cargo = await Cargo.get();
+  //     await cargo.installCached(crate, version);
+  //   }
 }
 
 async function main(): Promise<void> {

@@ -9,7 +9,7 @@ import * as http from "@actions/http-client";
 import AWS, { Credentials } from "aws-sdk";
 import { Options } from "./main";
 
-const S3_URL = "https://rust-tool-cache.s3-us-west-2.amazonaws.com";
+// const S3_URL = "https://rust-tool-cache.s3-us-west-2.amazonaws.com";
 // Path to the public key of the sign certificate.
 // It is resolved either from compiled `dist/index.js` during usual Action run,
 // or from this one file and always points to the file at the repo root.
@@ -49,13 +49,13 @@ async function resolveVersion(crate: string): Promise<string> {
   return resp.result["crate"]["newest_version"];
 }
 
-function buildUrl(crate: string, version: string): string {
-  const runner = getRunner();
+// function buildUrl(crate: string, version: string): string {
+//   const runner = getRunner();
 
-  core.debug(`Determined current Actions runner OS: ${runner}`);
+//   core.debug(`Determined current Actions runner OS: ${runner}`);
 
-  return `${S3_URL}/${crate}/${runner}/${crate}-${version}.zip`;
-}
+//   return `${S3_URL}/${crate}/${runner}/${crate}-${version}.zip`;
+// }
 
 function binPath(): string {
   return path.join(os.homedir(), ".cargo", "bin");
@@ -92,17 +92,17 @@ export async function downloadFromCache(
     version = await resolveVersion(crate);
     core.info(`Newest ${crate} version available at crates.io: ${version}`);
   }
-  const url = buildUrl(crate, version);
+  //   const url = buildUrl(crate, version);
   // const signatureUrl = `${url}.sig`;
 
   const path = targetPath(crate);
+  core.info(path);
   // const signaturePath = `${path}.sig`;
 
-  core.debug(`Constructed S3 URL for ${crate}: ${url}`);
+  //   core.debug(`Constructed S3 URL for ${crate}: ${url}`);
 
   try {
     await fs.access(path);
-
     core.warning(`Crate ${crate} already exist at ${path}`);
   } catch (error) {
     // core.info(`Downloading ${crate} signature into ${signaturePath}`);
@@ -118,19 +118,27 @@ export async function downloadFromCache(
       Bucket: "rust-tool-cache",
       Key: `${crate}/${runner}/${crate}-${version}.zip`,
     };
-    const response = await s3.getObject(getObjectRequest).promise();
-    core.info("Successfully downloaded");
-    core.info(String(response.Body));
-    writeFileSync(path, response.Body?.toString());
-    core.info("Wrote to file!");
+    core.info("Going to make request");
+    try {
+      const response = await s3.getObject(getObjectRequest).promise();
+      core.info("Successfully made request!");
+      core.info(String(response.Body));
+      writeFileSync(path, response.Body?.toString());
+      core.info("Wrote to file!");
+      const cargoBinPath = binPath();
+      core.info(`Extracting files into ${cargoBinPath}`);
+      await tc.extractZip(path, cargoBinPath);
+      await fs.chmod(path, 0o755);
+    } catch (err) {
+      core.error("ERROR");
+      core.error(err);
+      throw err;
+    }
 
     // try {
     // core.info("Starting signature verification process");
     // await verify(path, signaturePath);
 
-    const cargoBinPath = binPath();
-    core.info(`Extracting files into ${cargoBinPath}`);
-    await tc.extractZip(path, cargoBinPath);
     // } catch (error) {
     //     core.warning(
     //         `Unable to validate signature for downloaded ${crate}!`
@@ -141,7 +149,5 @@ export async function downloadFromCache(
     //     await fs.unlink(signaturePath);
     //     throw error;
     // }
-
-    await fs.chmod(path, 0o755);
   }
 }
