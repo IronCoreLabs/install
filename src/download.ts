@@ -7,11 +7,11 @@ import * as exec from "@actions/exec";
 import * as tc from "@actions/tool-cache";
 import * as http from "@actions/http-client";
 
-const CLOUDFRONT_ROOT = "https://d1ad61wkrfbmp3.cloudfront.net";
+const S3_URL = "https://rust-tool-cache.s3-us-west-2.amazonaws.com";
 // Path to the public key of the sign certificate.
 // It is resolved either from compiled `dist/index.js` during usual Action run,
 // or from this one file and always points to the file at the repo root.
-const CACHE_PUBLIC_KEY = path.resolve(__dirname, "..", "public.pem");
+// const CACHE_PUBLIC_KEY = path.resolve(__dirname, "..", "public.pem");
 
 function getRunner(): string {
     const platform = os.platform() as string;
@@ -22,11 +22,12 @@ function getRunner(): string {
             return "macos-10.15";
         case "linux":
             // TODO: Is there better way to determine Actions runner OS?
-            if (os.release().startsWith("4.15")) {
-                return "ubuntu-16.04";
-            } else {
-                return "ubuntu-18.04";
-            }
+            // if (os.release().startsWith("4.15")) {
+            //     return "ubuntu-16.04";
+            // } else {
+            //     return "ubuntu-18.04";
+            // }
+            return "ubuntu-20.04";
         default:
             throw new Error("Unsupported OS");
     }
@@ -51,7 +52,7 @@ function buildUrl(crate: string, version: string): string {
 
     core.debug(`Determined current Actions runner OS: ${runner}`);
 
-    return `${CLOUDFRONT_ROOT}/${crate}/${runner}/${crate}-${version}.zip`;
+    return `${S3_URL}/${crate}/${runner}/${crate}-${version}.zip`;
 }
 
 function binPath(): string {
@@ -67,17 +68,17 @@ function targetPath(crate: string): string {
     return path.join(os.tmpdir(), filename);
 }
 
-async function verify(crate: string, signature: string): Promise<void> {
-    await exec.exec("openssl", [
-        "dgst",
-        "-sha256",
-        "-verify",
-        CACHE_PUBLIC_KEY,
-        "-signature",
-        signature,
-        crate,
-    ]);
-}
+// async function verify(crate: string, signature: string): Promise<void> {
+//     await exec.exec("openssl", [
+//         "dgst",
+//         "-sha256",
+//         "-verify",
+//         CACHE_PUBLIC_KEY,
+//         "-signature",
+//         signature,
+//         crate,
+//     ]);
+// }
 
 export async function downloadFromCache(
     crate: string,
@@ -89,10 +90,10 @@ export async function downloadFromCache(
         core.info(`Newest ${crate} version available at crates.io: ${version}`);
     }
     const url = buildUrl(crate, version);
-    const signatureUrl = `${url}.sig`;
+    // const signatureUrl = `${url}.sig`;
 
     const path = targetPath(crate);
-    const signaturePath = `${path}.sig`;
+    // const signaturePath = `${path}.sig`;
 
     core.debug(`Constructed S3 URL for ${crate}: ${url}`);
 
@@ -101,29 +102,29 @@ export async function downloadFromCache(
 
         core.warning(`Crate ${crate} already exist at ${path}`);
     } catch (error) {
-        core.info(`Downloading ${crate} signature into ${signaturePath}`);
-        await tc.downloadTool(signatureUrl, signaturePath);
+        // core.info(`Downloading ${crate} signature into ${signaturePath}`);
+        // await tc.downloadTool(signatureUrl, signaturePath);
 
         core.info(`Downloading ${crate} == ${version} into ${path}`);
         await tc.downloadTool(url, path);
 
-        try {
-            core.info("Starting signature verification process");
-            await verify(path, signaturePath);
+        // try {
+            // core.info("Starting signature verification process");
+            // await verify(path, signaturePath);
 
-            const cargoBinPath = binPath();
-            core.info(`Extracting files into ${cargoBinPath}`);
-            await tc.extractZip(path, cargoBinPath);
-        } catch (error) {
-            core.warning(
-                `Unable to validate signature for downloaded ${crate}!`
-            );
+        const cargoBinPath = binPath();
+        core.info(`Extracting files into ${cargoBinPath}`);
+        await tc.extractZip(path, cargoBinPath);
+        // } catch (error) {
+        //     core.warning(
+        //         `Unable to validate signature for downloaded ${crate}!`
+        //     );
 
-            // Remove downloaded files, as they are now considered dangerous now
-            await fs.unlink(path);
-            await fs.unlink(signaturePath);
-            throw error;
-        }
+        //     // Remove downloaded files, as they are now considered dangerous now
+        //     await fs.unlink(path);
+        //     await fs.unlink(signaturePath);
+        //     throw error;
+        // }
 
         await fs.chmod(path, 0o755);
     }
