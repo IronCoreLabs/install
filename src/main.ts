@@ -4,17 +4,19 @@ import { Cargo } from "@actions-rs/core";
 import * as input from "./input";
 import * as download from "./download";
 
-interface Options {
+export interface Options {
   useToolCache: boolean;
-  useCache: boolean;
+  accessKey: string;
+  secretKey: string;
 }
 
 async function downloadFromToolCache(
   crate: string,
-  version: string
+  version: string,
+  options: Options
 ): Promise<void> {
   try {
-    await download.downloadFromCache(crate, version);
+    await download.downloadFromCache(crate, version, options);
   } catch (error) {
     core.warning(
       `Unable to download ${crate} == ${version} from the tool cache: ${error}`
@@ -34,7 +36,7 @@ export async function run(
         core.info("Tool cache is explicitly enabled via the Action input");
         core.startGroup("Downloading from the tool cache");
 
-        return await downloadFromToolCache(crate, version);
+        return await downloadFromToolCache(crate, version, options);
       } finally {
         core.endGroup();
       }
@@ -56,7 +58,8 @@ async function main(): Promise<void> {
 
     await run(actionInput.crate, actionInput.version, {
       useToolCache: actionInput.useToolCache,
-      useCache: actionInput.useCache,
+      accessKey: actionInput.accessKey,
+      secretKey: actionInput.secretKey,
     });
   } catch (error) {
     core.setFailed(error.message);

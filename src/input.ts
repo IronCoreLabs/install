@@ -9,19 +9,21 @@ export interface Input {
   crate: string;
   version: string;
   useToolCache: boolean;
-  useCache: boolean;
+  accessKey: string;
+  secretKey: string;
 }
 
 export function get(): Input {
   const crate = input.getInput("crate", { required: true });
   const version = input.getInput("version", { required: true });
-  const useToolCache = input.getInputBool("use-tool-cache") || false;
-  const useCache = input.getInputBool("use-cache") || true;
+  const accessKey = input.getInput("access-key", { required: true });
+  const secretKey = input.getInput("secret-key", { required: true });
 
   return {
     crate: crate,
     version: version,
-    useToolCache: useToolCache,
-    useCache: useCache,
+    useToolCache: true,
+    accessKey,
+    secretKey,
   };
 }

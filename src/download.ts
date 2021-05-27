@@ -1,11 +1,13 @@
 import os from "os";
-import { promises as fs } from "fs";
+import { promises as fs, writeFileSync } from "fs";
 import path from "path";
 
 import * as core from "@actions/core";
 // import * as exec from "@actions/exec";
 import * as tc from "@actions/tool-cache";
 import * as http from "@actions/http-client";
+import AWS, { Credentials } from "aws-sdk";
+import { Options } from "./main";
 
 const S3_URL = "https://rust-tool-cache.s3-us-west-2.amazonaws.com";
 // Path to the public key of the sign certificate.
@@ -82,7 +84,8 @@ function targetPath(crate: string): string {
 
 export async function downloadFromCache(
   crate: string,
-  version: string
+  version: string,
+  options: Options
 ): Promise<void> {
   if (version == "latest") {
     core.debug(`Latest version requested for ${crate}, querying crates.io`);
@@ -106,7 +109,22 @@ export async function downloadFromCache(
     // await tc.downloadTool(signatureUrl, signaturePath);
 
     core.info(`Downloading ${crate} == ${version} into ${path}`);
-    await tc.downloadTool(url, path);
+    const runner = getRunner();
+
+    const creds = new Credentials(options.accessKey, options.secretKey);
+    AWS.config.update({ region: "us-west-2", credentials: creds });
+    const s3 = new AWS.S3({ apiVersion: "2006-03-01" });
+    const getObjectRequest = {
+      Bucket: "rust-tool-cache",
+      Key: `${crate}/${runner}/${crate}-${version}.zip`,
+    };
+    s3.getObject(getObjectRequest, function (err, data) {
+      if (err) throw err;
+      else {
+        console.log("Success", data);
+        writeFileSync(path, data.Body?.toString());
+      }
+    });
 
     // try {
     // core.info("Starting signature verification process");
