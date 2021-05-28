@@ -23,6 +23,7 @@ function getRunner(): string {
     case "darwin":
       return "macos-10.15";
     case "linux":
+      core.info(os.platform());
       // TODO: Is there better way to determine Actions runner OS?
       // if (os.release().startsWith("4.15")) {
       //     return "ubuntu-16.04";
