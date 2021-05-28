@@ -3,42 +3,15 @@ import { promises as fs } from "fs";
 import path from "path";
 
 import * as core from "@actions/core";
-// import * as exec from "@actions/exec";
 import * as tc from "@actions/tool-cache";
 import * as http from "@actions/http-client";
 import AWS, { Credentials } from "aws-sdk";
 import { Options } from "./main";
 
-// const S3_URL = "https://rust-tool-cache.s3-us-west-2.amazonaws.com";
 // Path to the public key of the sign certificate.
 // It is resolved either from compiled `dist/index.js` during usual Action run,
 // or from this one file and always points to the file at the repo root.
 // const CACHE_PUBLIC_KEY = path.resolve(__dirname, "..", "public.pem");
-
-function getRunner(): string {
-  const platform = os.platform() as string;
-  switch (platform) {
-    case "win32":
-      return "windows-2019";
-    case "darwin":
-      return "macos-10.15";
-    case "linux":
-      core.info(os.release());
-      core.info(os.hostname());
-      core.info(os.type());
-      core.info(os.version());
-
-      // TODO: Is there better way to determine Actions runner OS?
-      // if (os.release().startsWith("4.15")) {
-      //     return "ubuntu-16.04";
-      // } else {
-      //     return "ubuntu-18.04";
-      // }
-      return "ubuntu-20.04";
-    default:
-      throw new Error("Unsupported OS");
-  }
-}
 
 async function resolveVersion(crate: string): Promise<string> {
   const url = `https://crates.io/api/v1/crates/${crate}`;
@@ -54,21 +27,10 @@ async function resolveVersion(crate: string): Promise<string> {
   return resp.result["crate"]["newest_version"];
 }
 
-// function buildUrl(crate: string, version: string): string {
-//   const runner = getRunner();
-
-//   core.debug(`Determined current Actions runner OS: ${runner}`);
-
-//   return `${S3_URL}/${crate}/${runner}/${crate}-${version}.zip`;
-// }
-
 function binPath(): string {
   return path.join(os.homedir(), ".cargo", "bin");
 }
 
-/**
- * Build download path
- */
 function targetPath(crate: string): string {
   const filename = `${crate}.zip`;
 
@@ -114,7 +76,7 @@ export async function downloadFromCache(
     // await tc.downloadTool(signatureUrl, signaturePath);
 
     core.info(`Downloading ${crate} == ${version} into ${path}`);
-    const runner = getRunner();
+    const runner = options.os;
 
     const creds = new Credentials(options.accessKey, options.secretKey);
     AWS.config.update({ region: "us-west-2", credentials: creds });

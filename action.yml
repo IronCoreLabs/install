@@ -14,6 +14,9 @@ inputs:
   secretkey:
     description: AWS secret key
     required: true
+  os:
+    description: OS for the runner (ex. ubuntu-20.04)
+    required: true
   version:
     description: Specify a version to install
     required: false

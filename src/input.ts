@@ -11,6 +11,7 @@ export interface Input {
   useToolCache: boolean;
   accessKey: string;
   secretKey: string;
+  os: string;
 }
 
 export function get(): Input {
@@ -18,6 +19,7 @@ export function get(): Input {
   const version = input.getInput("version", { required: true });
   const accessKey = input.getInput("accesskey", { required: true });
   const secretKey = input.getInput("secretkey", { required: true });
+  const os = input.getInput("os", { required: true });
 
   return {
     crate: crate,
@@ -25,5 +27,6 @@ export function get(): Input {
     useToolCache: true,
     accessKey,
     secretKey,
+    os,
   };
 }

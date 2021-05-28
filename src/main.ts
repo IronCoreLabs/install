@@ -1,13 +1,13 @@
 import * as core from "@actions/core";
-// import { Cargo } from "@actions-rs/core";
-
 import * as input from "./input";
 import * as download from "./download";
+import { Cargo } from "@actions-rs/core";
 
 export interface Options {
   useToolCache: boolean;
   accessKey: string;
   secretKey: string;
+  os: string;
 }
 
 async function downloadFromToolCache(
@@ -30,26 +30,26 @@ export async function run(
   version: string,
   options: Options
 ): Promise<void> {
-  //   try {
-  if (options.useToolCache) {
-    try {
-      core.info("Tool cache is explicitly enabled via the Action input");
-      core.startGroup("Downloading from the tool cache");
+  try {
+    if (options.useToolCache) {
+      try {
+        core.info("Tool cache is explicitly enabled via the Action input");
+        core.startGroup("Downloading from the tool cache");
 
-      return await downloadFromToolCache(crate, version, options);
-    } finally {
-      core.endGroup();
+        return await downloadFromToolCache(crate, version, options);
+      } finally {
+        core.endGroup();
+      }
+    } else {
+      core.info("Tool cache is disabled in the Action inputs, skipping it");
+
+      throw new Error("Faster installation options either failed or disabled");
     }
-  } else {
-    core.info("Tool cache is disabled in the Action inputs, skipping it");
-
-    throw new Error("Faster installation options either failed or disabled");
+  } catch (error) {
+    core.info("Falling back to the `cargo install` command");
+    const cargo = await Cargo.get();
+    await cargo.installCached(crate, version);
   }
-  //   } catch (error) {
-  //     core.info("Falling back to the `cargo install` command");
-  //     const cargo = await Cargo.get();
-  //     await cargo.installCached(crate, version);
-  //   }
 }
 
 async function main(): Promise<void> {
@@ -60,6 +60,7 @@ async function main(): Promise<void> {
       useToolCache: actionInput.useToolCache,
       accessKey: actionInput.accessKey,
       secretKey: actionInput.secretKey,
+      os: actionInput.os,
     });
   } catch (error) {
     core.setFailed(error.message);
