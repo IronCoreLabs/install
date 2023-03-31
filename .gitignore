@@ -93,3 +93,6 @@ typings/
 # CI build stuff
 ci/venv
 ci/build
+
+# nix stuff
+.direnv
