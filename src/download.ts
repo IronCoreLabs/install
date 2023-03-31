@@ -41,18 +41,6 @@ function targetPath(crate: string): string {
   return path.join(os.tmpdir(), filename);
 }
 
-// async function verify(crate: string, signature: string): Promise<void> {
-//     await exec.exec("openssl", [
-//         "dgst",
-//         "-sha256",
-//         "-verify",
-//         CACHE_PUBLIC_KEY,
-//         "-signature",
-//         signature,
-//         crate,
-//     ]);
-// }
-
 export async function downloadFromCache(
   crate: string,
   version: string,
@@ -63,31 +51,26 @@ export async function downloadFromCache(
     version = await resolveVersion(crate);
     core.info(`Newest ${crate} version available at crates.io: ${version}`);
   }
-  //   const url = buildUrl(crate, version);
-  // const signatureUrl = `${url}.sig`;
 
   const path = targetPath(crate);
   core.info(path);
-  // const signaturePath = `${path}.sig`;
-
-  //   core.debug(`Constructed S3 URL for ${crate}: ${url}`);
 
   try {
     await fs.access(path);
     core.warning(`Crate ${crate} already exist at ${path}`);
   } catch (error) {
-    // core.info(`Downloading ${crate} signature into ${signaturePath}`);
-    // await tc.downloadTool(signatureUrl, signaturePath);
-
-    core.info(`Downloading ${crate} == ${version} into ${path}`);
     const runner = options.os;
+    const toolCacheKey = `${crate}/${runner}/${crate}-${version}.zip`;
+    core.info(
+      `Downloading ${crate} == ${version} into ${path} from tool cache key ${toolCacheKey}`
+    );
 
     const creds = new Credentials(options.accessKey, options.secretKey);
     AWS.config.update({ region: "us-west-2", credentials: creds });
     const s3 = new AWS.S3({ apiVersion: "2006-03-01" });
     const getObjectRequest = {
       Bucket: "rust-tool-cache",
-      Key: `${crate}/${runner}/${crate}-${version}.zip`,
+      Key: toolCacheKey,
       Expires: 30,
     };
     const url = s3.getSignedUrl("getObject", getObjectRequest);
@@ -96,20 +79,5 @@ export async function downloadFromCache(
     core.info(`Extracting files into ${cargoBinPath}`);
     await tc.extractZip(path, cargoBinPath);
     await fs.chmod(path, 0o755);
-
-    // try {
-    // core.info("Starting signature verification process");
-    // await verify(path, signaturePath);
-
-    // } catch (error) {
-    //     core.warning(
-    //         `Unable to validate signature for downloaded ${crate}!`
-    //     );
-
-    //     // Remove downloaded files, as they are now considered dangerous now
-    //     await fs.unlink(path);
-    //     await fs.unlink(signaturePath);
-    //     throw error;
-    // }
   }
 }
