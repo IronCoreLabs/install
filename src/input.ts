@@ -2,6 +2,7 @@
  * Parse action input into a some proper thing.
  */
 import { input } from "@actions-rs/core";
+import * as core from "@actions/core";
 import os from "os";
 
 // Parsed action input
@@ -19,7 +20,12 @@ export function get(): Input {
   const version = input.getInput("version", { required: true });
   const accessKey = input.getInput("accesskey", { required: true });
   const secretKey = input.getInput("secretkey", { required: true });
-  const osArch = input.getInput("os", { required: false });
+  let osArch = input.getInput("os", { required: false });
+  if (osArch === "undefined" || osArch === undefined) {
+    const detected = `${os.platform()}-${os.release()}-${os.arch()}`;
+    core.info(`os input not provided, defaulting to ${detected}`);
+    osArch = detected;
+  }
 
   return {
     crate: crate,
@@ -27,9 +33,6 @@ export function get(): Input {
     useToolCache: true,
     accessKey,
     secretKey,
-    os:
-      osArch === "undefined" || osArch === undefined
-        ? `${os.platform()}-${os.release()}-${os.arch()}`
-        : osArch,
+    os: osArch,
   };
 }
