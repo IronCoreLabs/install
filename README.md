@@ -10,15 +10,14 @@ This GitHub Action provides faster version of the `cargo install` command.
 
 ⚠ ️**NOTE: This is an experimental Action.** ⚠
 
-**Table of Contents**
+## Table of Contents
 
 * [Why?](#why)
 * [How does this work?](#how-does-it-work)
 * [Example workflow](#example-workflow)
 * [Inputs](#inputs)
 * [Tool cache](#tool-cache)
-    * [Security considerations](#security-considerations)
-* [GitHub cache](#github-cache)
+  * [Security considerations](#security-considerations)
 * [License](#license)
 * [Contribute and support](#contribute-and-support)
 
@@ -39,7 +38,6 @@ If requested crate does not exist in the crates cache storage,
 this Action will fall back to the usual `cargo install`.\
 As soon as [actions-rs/meta#21](https://github.com/actions-rs/meta/issues/21) will be implemented,
 this Action will also cache compiled binary in the GitHub cache.
-
 
 ## Example workflow
 
@@ -113,3 +111,11 @@ check the [Contributing guide](https://github.com/actions-rs/.github/blob/master
 
 You can also support author by funding the ongoing project work,
 see [Sponsoring](https://actions-rs.github.io/#sponsoring).
+
+To install dependencies for local development, you'll need to authenticate with the GitHub NPM repository.
+
+```console
+npm login --registry https://npm.pkg.github.com
+```
+
+For your password, provide a GitHub token with `read:packages` permissions.

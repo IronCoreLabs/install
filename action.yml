@@ -3,7 +3,7 @@ description: "Install a Rust binary as fast as possible"
 author: "ironcorelabs"
 branding:
   icon: play-circle
-  color: black
+  color: gray-dark
 inputs:
   crate:
     description: Binary crate name
@@ -16,11 +16,11 @@ inputs:
     required: true
   os:
     description: OS for the runner (ex. ubuntu-20.04)
-    required: true
+    required: false
   version:
     description: Specify a version to install
     required: false
     default: "latest"
 runs:
-  using: "node12"
+  using: "node16"
   main: "dist/index.js"

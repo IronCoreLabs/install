@@ -1,8 +1,8 @@
 /**
  * Parse action input into a some proper thing.
  */
-
 import { input } from "@actions-rs/core";
+import os from "os";
 
 // Parsed action input
 export interface Input {
@@ -19,7 +19,7 @@ export function get(): Input {
   const version = input.getInput("version", { required: true });
   const accessKey = input.getInput("accesskey", { required: true });
   const secretKey = input.getInput("secretkey", { required: true });
-  const os = input.getInput("os", { required: true });
+  const osArch = input.getInput("os", { required: false });
 
   return {
     crate: crate,
@@ -27,6 +27,9 @@ export function get(): Input {
     useToolCache: true,
     accessKey,
     secretKey,
-    os,
+    os:
+      osArch === "undefined" || osArch === undefined
+        ? `${os.platform()}-${os.release()}-${os.arch()}`
+        : osArch,
   };
 }
