@@ -12,8 +12,8 @@
         devShell = pkgs.mkShell {
           buildInputs = with pkgs.nodePackages; 
           [
-            pkgs.nodejs-18_x
-            (pkgs.yarn.override { nodejs = pkgs.nodejs-18_x; })
+            pkgs.nodejs-16_x
+            (pkgs.yarn.override { nodejs = pkgs.nodejs-16_x; })
           ];
         };
       });
