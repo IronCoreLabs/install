@@ -119,3 +119,7 @@ npm login --registry https://npm.pkg.github.com
 ```
 
 For your password, provide a GitHub token with `read:packages` permissions.
+
+## Releasing
+
+Manually run a local build with `npm run build` and push the result up along with a tag for the version of the release.
