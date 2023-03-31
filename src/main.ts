@@ -63,7 +63,9 @@ async function main(): Promise<void> {
       os: actionInput.os,
     });
   } catch (error) {
-    core.setFailed(error.message);
+    if (error instanceof Error) {
+      core.setFailed(error.message);
+    }
   }
 }
 

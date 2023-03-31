@@ -19,7 +19,11 @@ async function resolveVersion(crate: string): Promise<string> {
     "@actions-rs (https://github.com/actions-rs/)"
   );
 
-  const resp: any = await client.getJson(url);
+  const resp: {
+    result: {
+      crate: { newest_version: string };
+    } | null;
+  } = await client.getJson(url);
   if (resp.result == null) {
     throw new Error("Unable to fetch latest crate version");
   }
