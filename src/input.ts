@@ -21,7 +21,7 @@ export function get(): Input {
   const accessKey = input.getInput("accesskey", { required: true });
   const secretKey = input.getInput("secretkey", { required: true });
   let osArch = input.getInput("os", { required: false });
-  if (osArch === "undefined" || osArch === undefined) {
+  if (osArch === "undefined" || osArch == undefined || osArch === "") {
     const detected = `${os.platform()}-${os.release()}-${os.arch()}`;
     core.info(`os input not provided, defaulting to ${detected}`);
     osArch = detected;
