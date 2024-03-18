@@ -31,7 +31,12 @@ export async function run(
   options: Options
 ): Promise<void> {
   try {
-    if (options.useToolCache) {
+    if (options.secretKey === "") {
+      core.info("Tool cache secret key was not provided, skipping it");
+      throw new Error(
+        "Faster installation options failed due to missing secrets"
+      );
+    } else if (options.useToolCache) {
       try {
         core.info("Tool cache is explicitly enabled via the Action input");
         core.startGroup("Downloading from the tool cache");
