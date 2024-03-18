@@ -12,8 +12,8 @@ inputs:
     description: AWS access key
     required: true
   secretkey:
-    description: AWS secret key
-    required: true
+    description: AWS secret key. If not provided or blank, skips the tool cache.
+    required: false
   os:
     description: OS for the runner (ex. ubuntu-20.04)
     required: false
@@ -22,5 +22,5 @@ inputs:
     required: false
     default: "latest"
 runs:
-  using: "node16"
+  using: "node20"
   main: "dist/index.js"

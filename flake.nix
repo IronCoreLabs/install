@@ -12,7 +12,7 @@
         devShell = pkgs.mkShell {
           buildInputs = with pkgs.nodePackages; 
           [
-            pkgs.nodejs-16_x
+            pkgs.nodejs_20
           ];
         };
       });

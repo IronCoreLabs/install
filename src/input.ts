@@ -19,7 +19,11 @@ export function get(): Input {
   const crate = input.getInput("crate", { required: true });
   const version = input.getInput("version", { required: true });
   const accessKey = input.getInput("accesskey", { required: true });
-  const secretKey = input.getInput("secretkey", { required: true });
+  // This will be empty when run from a fork
+  let secretKey = input.getInput("secretkey", { required: false });
+  if (secretKey === "undefined" || secretKey == undefined) {
+    secretKey = "";
+  }
   let osArch = input.getInput("os", { required: false });
   if (osArch === "undefined" || osArch == undefined || osArch === "") {
     const detected = `${os.platform()}-${os.release()}-${os.arch()}`;
